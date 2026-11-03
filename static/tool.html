@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Format JSON · Brace</title>
+    <link rel="icon" href="icons/on-32.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        min-height: 100vh;
+      }
+      .page {
+        height: 100vh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        gap: 14px;
+        padding: 16px 20px 12px;
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+      .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .top h1 {
+        font-family: var(--font-display);
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .top h1 .logo {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+      }
+      .top h1 span.sub {
+        font: 500 13.5px var(--font);
+        letter-spacing: 0;
+        color: var(--text-3);
+      }
+      .panes {
+        min-height: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 14px;
+      }
+      .pane {
+        min-height: 0;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+      .pane-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 8px;
+        min-height: 52px;
+        padding: 8px 10px 8px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .pane-title {
+        font-weight: 650;
+        font-size: 14px;
+        margin-right: auto;
+      }
+      .pane-body {
+        min-height: 0;
+        overflow: auto;
+        position: relative;
+      }
+      textarea#input {
+        display: block;
+        width: 100%;
+        height: 100%;
+        resize: none;
+        border: 0;
+        outline: none;
+        padding: 14px 16px;
+        background: transparent;
+        color: var(--text);
+        font: 13px/1.6 var(--mono);
+        tab-size: 2;
+      }
+      textarea#input::placeholder {
+        color: var(--text-3);
+      }
+      .drop {
+        position: absolute;
+        inset: 10px;
+        display: grid;
+        place-items: center;
+        border: 2px dashed var(--accent);
+        border-radius: var(--radius);
+        background: color-mix(in srgb, var(--accent-soft) 70%, var(--surface));
+        color: var(--accent-strong);
+        font-weight: 600;
+        pointer-events: none;
+      }
+      #tree-tools {
+        flex: 1 1 140px;
+        min-width: 0;
+      }
+      #tree-tools .b-search .input {
+        width: 100%;
+      }
+      #tree-host {
+        padding: 12px 10px;
+      }
+      #text-out {
+        padding: 14px 16px;
+      }
+      .empty {
+        height: 100%;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 10px;
+        padding: 24px;
+        text-align: center;
+        color: var(--text-3);
+        font-size: 13.5px;
+      }
+      .empty .big {
+        font: 700 44px/1 var(--mono);
+        color: var(--accent);
+        opacity: 0.5;
+        letter-spacing: 0.1em;
+      }
+      .status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 40px;
+        padding: 8px 16px;
+        border-top: 1px solid var(--border);
+        font-size: 12.5px;
+        color: var(--text-2);
+      }
+      .status .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--text-3);
+        flex: none;
+      }
+      .status.valid .dot {
+        background: var(--good);
+      }
+      .status.invalid {
+        background: var(--danger-soft);
+        color: var(--text);
+      }
+      .status.invalid .dot {
+        background: var(--danger);
+      }
+      .status button {
+        margin-left: auto;
+        flex: none;
+      }
+      .status .path {
+        margin-left: auto;
+        font-family: var(--mono);
+        color: var(--text-3);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .status .path.notice {
+        font-family: var(--font);
+        color: var(--accent-strong);
+        font-weight: 600;
+      }
+      .foot {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 12px;
+        color: var(--text-3);
+      }
+      .foot a {
+        color: var(--text-2);
+      }
+      @media (max-width: 900px) {
+        .page {
+          height: auto;
+        }
+        .panes {
+          grid-template-columns: 1fr;
+        }
+        .pane {
+          min-height: 60vh;
+        }
+        .top .actions-hint {
+          display: none;
+        }
+      }
+    </style>
+    <script src="parse.js"></script>
+    <script src="viewer.js"></script>
+    <script type="module" src="tool.js"></script>
+  </head>
+  <body>
+    <div class="page">
+      <header class="top">
+        <h1><span class="logo"></span>Brace <span class="sub">Format, validate and explore JSON</span></h1>
+        <span class="faint actions-hint" style="font-size: 12.5px"><span class="kbd">⌘</span> <span class="kbd">↵</span> format the input in place</span>
+      </header>
+
+      <div class="panes">
+        <section class="pane" aria-label="Input">
+          <div class="pane-head">
+            <span class="pane-title">Input</span>
+            <button class="btn sm ghost" id="open">Open file</button>
+            <button class="btn sm ghost" id="sample">Sample</button>
+            <button class="btn sm ghost" id="clear">Clear</button>
+            <input type="file" id="file" accept=".json,application/json,text/plain" hidden />
+          </div>
+          <div class="pane-body">
+            <textarea id="input" spellcheck="false" autocomplete="off" placeholder="Paste JSON here, or drop a .json file anywhere on the page"></textarea>
+            <div class="drop" id="drop" hidden>Drop to open</div>
+          </div>
+          <div class="status" id="status" role="status"><span class="dot"></span><span id="status-text">Waiting for JSON</span></div>
+        </section>
+
+        <section class="pane" aria-label="Output">
+          <div class="pane-head">
+            <div class="segmented" id="view" role="group" aria-label="View">
+              <button data-view="tree">Tree</button>
+              <button data-view="text">Text</button>
+            </div>
+            <span id="tree-tools"></span>
+            <div class="segmented" id="indent" role="group" aria-label="Indentation" hidden>
+              <button data-indent="2">2</button>
+              <button data-indent="4">4</button>
+              <button data-indent="tab">Tab</button>
+              <button data-indent="min">Min</button>
+            </div>
+            <span class="spacer" style="margin-left: auto"></span>
+            <button class="btn sm ghost" id="copy">Copy</button>
+            <button class="btn sm ghost" id="download">Download</button>
+            <button class="btn sm primary" id="apply" title="Replace the input with this formatting">Use as input</button>
+          </div>
+          <div class="pane-body" id="out">
+            <div class="empty" id="empty"><span class="big">{ }</span>Your formatted JSON shows up here.</div>
+            <div id="tree-host" hidden></div>
+            <pre class="b-raw" id="text-out" hidden></pre>
+          </div>
+          <div class="status"><span id="out-info">Click a key to copy its path, a value to copy the value</span><span class="path" id="path"></span></div>
+        </section>
+      </div>
+
+      <footer class="foot">
+        <span>Everything stays in this browser. Numbers keep their exact digits.</span>
+        <span>Made by <a href="https://x.com/natgurlain" target="_blank" rel="noopener">@natgurlain</a> · <a href="https://github.com/natgurlain/brace" target="_blank" rel="noopener">Source on GitHub</a></span>
+      </footer>
+    </div>
+  </body>
+</html>
